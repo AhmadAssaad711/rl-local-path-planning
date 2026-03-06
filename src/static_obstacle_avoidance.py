@@ -37,8 +37,8 @@ Q_TABLE_PATH = os.path.join("results", "q_table.pkl")
 ENV_CONFIG = {
     # Road
     "lanes_count": 3,
-    "vehicles_count": 5,            # number of obstacle vehicles on the road
-    "vehicles_density": 1.0,
+    "vehicles_count": 0,            # we spawn our own obstacles in the wrapper
+    "vehicles_density": 0,
     "initial_lane_id": 1,           # ego starts in centre lane
     "ego_spacing": 3,               # initial gap around ego at spawn
 
@@ -74,29 +74,85 @@ ENV_CONFIG = {
     "offroad_terminal": True,
 }
 
+# Obstacle-spawning parameters
+OBSTACLE_SPACING = 15.0   # metres between consecutive obstacles
+OBSTACLE_LOOKAHEAD = 120  # metres ahead to keep obstacles populated
+LANE_WIDTH_HWY = 4.0      # highway-env default lane width
+
 
 # ======================================================================
 # 2. Static-obstacle wrapper
 # ======================================================================
 
 class StaticObstacleWrapper(gym.Wrapper):
-    """Freeze all non-ego vehicles each step to simulate static obstacles."""
+    """
+    Replace default traffic with continuously-spawned static obstacles.
+
+    Obstacles are placed every OBSTACLE_SPACING metres in a random lane,
+    always keeping the region up to OBSTACLE_LOOKAHEAD metres ahead of
+    the ego populated.  Obstacles that fall behind are pruned each step.
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+        self._rng = np.random.default_rng()
+        self._next_x = 0.0          # x-position of the next obstacle to spawn
+        self._obstacles = []         # list of Obstacle instances we own
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self._freeze()
-        # Re-observe after freezing so kinematics reflect speed = 0
+
+        seed = kwargs.get("seed")
+        self._rng = np.random.default_rng(seed)
+        self._obstacles = []
+
+        # Remove any default vehicles (except ego)
+        ego = self.env.unwrapped.vehicle
+        self.env.unwrapped.road.vehicles[:] = [ego]
+
+        # Start spawning a safe distance ahead of the ego
+        self._next_x = ego.position[0] + OBSTACLE_SPACING
+        self._populate_ahead()
+
         obs = self.env.unwrapped.observation_type.observe()
         return obs, info
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
-        self._freeze()
+        self._populate_ahead()
+        self._prune_behind()
         return obs, reward, terminated, truncated, info
 
-    def _freeze(self):
-        for v in self.env.unwrapped.road.vehicles[1:]:
-            v.speed = 0
+    # ---- internal helpers ----
+
+    def _populate_ahead(self):
+        """Spawn obstacles up to OBSTACLE_LOOKAHEAD metres ahead of ego."""
+        from highway_env.vehicle.kinematics import Vehicle
+
+        ego_x = self.env.unwrapped.vehicle.position[0]
+        road = self.env.unwrapped.road
+        n_lanes = ENV_CONFIG["lanes_count"]
+
+        while self._next_x <= ego_x + OBSTACLE_LOOKAHEAD:
+            lane_idx = int(self._rng.integers(0, n_lanes))
+            y = lane_idx * LANE_WIDTH_HWY   # lanes at y = 0, 4, 8 …
+            obj = Vehicle(road, position=[self._next_x, y], speed=0)
+            road.vehicles.append(obj)
+            self._obstacles.append(obj)
+            self._next_x += OBSTACLE_SPACING
+
+    def _prune_behind(self):
+        """Remove obstacles far behind the ego to save memory."""
+        ego_x = self.env.unwrapped.vehicle.position[0]
+        road = self.env.unwrapped.road
+        keep = []
+        for o in self._obstacles:
+            if o.position[0] < ego_x - 50:
+                if o in road.vehicles:
+                    road.vehicles.remove(o)
+            else:
+                keep.append(o)
+        self._obstacles = keep
 
 
 def make_env(render_mode=None):
