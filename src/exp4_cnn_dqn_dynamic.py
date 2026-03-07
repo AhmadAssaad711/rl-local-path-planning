@@ -403,12 +403,12 @@ class ReplayBuffer:
 # ======================================================================
 
 def train_dqn(
-    total_episodes: int = 3_000,
+    total_episodes: int = 10000,
     lr: float = 1e-3,
     gamma: float = 0.99,
     epsilon_start: float = 1.0,
     epsilon_end: float = 0.05,
-    epsilon_decay: float = 0.998,
+    epsilon_decay: float = 0.9995,
     batch_size: int = 64,
     replay_capacity: int = 50_000,
     target_update_freq: int = 10,
