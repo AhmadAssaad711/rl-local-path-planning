@@ -1,0 +1,20 @@
+[project]
+name = "unstructured-traffic-rl"
+version = "0.1.0"
+description = "Research platform for autonomous driving in unstructured traffic using highway-env."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "gymnasium>=1.2.0",
+    "highway-env>=1.10.0",
+    "numpy>=2.0.0",
+    "pygame>=2.6.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["unstructured_traffic_rl*"]
