@@ -1,0 +1,161 @@
+[
+  {
+    "variant": "baseline",
+    "seed": 0,
+    "timesteps": 512,
+    "eval_episodes": 3,
+    "model_path": "experiments\\ppo_ablation\\20260317_230503\\models\\baseline_seed0.zip",
+    "summary": {
+      "mean_episode_return": 29.079488427257193,
+      "mean_steps": 40.0,
+      "crash_rate": 0.0,
+      "mean_lane_changes": 0.0,
+      "mean_speed": 18.933331844963824,
+      "mean_min_speed": 13.104562451300453,
+      "mean_throttle": -0.23914135619997978,
+      "mean_stop_ratio": 0.15833333333333333,
+      "mean_distance_travelled": 762.018767570292
+    },
+    "episodes": [
+      {
+        "episode_return": 27.640211643984024,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 18.296546897113963,
+        "min_speed": 11.762502647531171,
+        "mean_throttle": -0.26614388525485994,
+        "stop_ratio": 0.25,
+        "distance_travelled": 737.0759935783792
+      },
+      {
+        "episode_return": 30.544638104642754,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 19.637813345749482,
+        "min_speed": 14.519583237393677,
+        "mean_throttle": -0.21067704856395722,
+        "stop_ratio": 0.05,
+        "distance_travelled": 789.6406650790722
+      },
+      {
+        "episode_return": 29.05361553314481,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 18.865635292028024,
+        "min_speed": 13.031601468976511,
+        "mean_throttle": -0.24060313478112222,
+        "stop_ratio": 0.175,
+        "distance_travelled": 759.3396440534249
+      }
+    ]
+  },
+  {
+    "variant": "progress",
+    "seed": 0,
+    "timesteps": 512,
+    "eval_episodes": 3,
+    "model_path": "experiments\\ppo_ablation\\20260317_230503\\models\\progress_seed0.zip",
+    "summary": {
+      "mean_episode_return": 29.24409503848752,
+      "mean_steps": 40.0,
+      "crash_rate": 0.0,
+      "mean_lane_changes": 0.0,
+      "mean_speed": 19.62217514990923,
+      "mean_min_speed": 14.436402128234029,
+      "mean_throttle": -0.21234962940216065,
+      "mean_stop_ratio": 0.08333333333333333,
+      "mean_distance_travelled": 789.0479014516804
+    },
+    "episodes": [
+      {
+        "episode_return": 27.74373148176733,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 18.912878712517575,
+        "min_speed": 12.96262793525029,
+        "mean_throttle": -0.24201929345726966,
+        "stop_ratio": 0.175,
+        "distance_travelled": 761.2565488574866
+      },
+      {
+        "episode_return": 30.781182571237434,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 20.42257135709521,
+        "min_speed": 16.03773574464291,
+        "mean_throttle": -0.18014924935996532,
+        "stop_ratio": 0.0,
+        "distance_travelled": 820.4330004576888
+      },
+      {
+        "episode_return": 29.2073710624578,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 19.5310753801149,
+        "min_speed": 14.30884270480889,
+        "mean_throttle": -0.21488034538924694,
+        "stop_ratio": 0.075,
+        "distance_travelled": 785.4541550398659
+      }
+    ]
+  },
+  {
+    "variant": "progress_clearance",
+    "seed": 0,
+    "timesteps": 512,
+    "eval_episodes": 3,
+    "model_path": "experiments\\ppo_ablation\\20260317_230503\\models\\progress_clearance_seed0.zip",
+    "summary": {
+      "mean_episode_return": 29.253561235843407,
+      "mean_steps": 40.0,
+      "crash_rate": 0.0,
+      "mean_lane_changes": 0.0,
+      "mean_speed": 19.649146163974734,
+      "mean_min_speed": 14.493902079370594,
+      "mean_throttle": -0.21119001880288124,
+      "mean_stop_ratio": 0.08333333333333333,
+      "mean_distance_travelled": 790.1040933591485
+    },
+    "episodes": [
+      {
+        "episode_return": 27.74608168240758,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 18.917624661168347,
+        "min_speed": 12.967604496845937,
+        "mean_throttle": -0.24191626235842706,
+        "stop_ratio": 0.175,
+        "distance_travelled": 761.4444265857225
+      },
+      {
+        "episode_return": 30.798468087989615,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 20.478321482155557,
+        "min_speed": 16.15893564444247,
+        "mean_throttle": -0.17771410271525384,
+        "stop_ratio": 0.0,
+        "distance_travelled": 822.6152660328366
+      },
+      {
+        "episode_return": 29.21613393713302,
+        "steps": 40,
+        "crashed": false,
+        "lane_changes": 0,
+        "mean_speed": 19.5514923486003,
+        "min_speed": 14.355166096823378,
+        "mean_throttle": -0.21393969133496285,
+        "stop_ratio": 0.075,
+        "distance_travelled": 786.2525874588865
+      }
+    ]
+  }
+]

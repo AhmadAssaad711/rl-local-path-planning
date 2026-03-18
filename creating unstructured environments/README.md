@@ -14,21 +14,22 @@ Research platform for autonomous driving behavior studies in chaotic and partial
 ## Repository structure
 
 ```text
-high-level path planning/
-├── datasets/
-├── tests/
-├── unstructured_traffic_rl/
-│   ├── env/
-│   ├── hazards/
-│   ├── rendering/
-│   ├── scenarios/
-│   ├── traffic_models/
-│   ├── training/
-│   └── utils/
-└── src/
+creating unstructured environments/
+|-- datasets/
+|-- tests/
+|-- unstructured_traffic_rl/
+|   |-- env/
+|   |-- hazards/
+|   |-- rendering/
+|   |-- scenarios/
+|   |-- traffic_models/
+|   |-- training/
+|   `-- utils/
+|-- pyproject.toml
+`-- README.md
 ```
 
-The legacy `src/` directory remains untouched and contains earlier single-scenario experiments. The new platform lives under `unstructured_traffic_rl/`.
+Earlier single-scenario experiments remain outside this folder under `../high-level path planning/`. The reusable unstructured-environment platform lives entirely inside this directory.
 
 ## Scenario library
 
@@ -55,7 +56,7 @@ The legacy `src/` directory remains untouched and contains earlier single-scenar
 
 ## Quick start
 
-From the `high-level path planning/` directory:
+From the `creating unstructured environments/` directory:
 
 ```powershell
 ..\.venv\Scripts\python.exe -m unstructured_traffic_rl.training.demo --scenario dense_urban_chaos --episodes 1 --render-mode human
@@ -84,6 +85,8 @@ Optional SB3 training example:
 ```powershell
 ..\.venv\Scripts\python.exe -m unstructured_traffic_rl.training.sb3_train --scenario dense_urban_chaos --algo ppo --timesteps 20000
 ```
+
+By default, trained SB3 checkpoints are written to a local `models/` directory inside this folder.
 
 ## RL interface
 

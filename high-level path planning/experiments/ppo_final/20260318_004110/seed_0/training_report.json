@@ -1,0 +1,81 @@
+{
+  "reward_variant": "progress_clearance",
+  "action_variant": "intent_guarded_shielded",
+  "observation_variant": "gap_augmented",
+  "seed": 0,
+  "total_timesteps": 1024,
+  "stage_steps": 256,
+  "eval_episodes": 10,
+  "best_score": 878.865612744532,
+  "best_checkpoint": "experiments\\ppo_final\\20260318_004110\\seed_0\\checkpoints\\step_256.zip",
+  "stages": [
+    {
+      "steps_done": 256,
+      "checkpoint_path": "experiments\\ppo_final\\20260318_004110\\seed_0\\checkpoints\\step_256.zip",
+      "score": 878.865612744532,
+      "summary": {
+        "mean_episode_return": 30.167421761615778,
+        "mean_steps": 40.0,
+        "crash_rate": 0.0,
+        "mean_lane_changes": 0.1,
+        "mean_lane_command_rate": 0.0025,
+        "mean_speed": 21.877740874212815,
+        "mean_min_speed": 19.60132886833952,
+        "mean_throttle": 0.06465081835165619,
+        "mean_stop_ratio": 0.0,
+        "mean_distance_travelled": 876.865612744532
+      }
+    },
+    {
+      "steps_done": 512,
+      "checkpoint_path": "experiments\\ppo_final\\20260318_004110\\seed_0\\checkpoints\\step_512.zip",
+      "score": 774.6515929830873,
+      "summary": {
+        "mean_episode_return": 28.047554185017134,
+        "mean_steps": 36.7,
+        "crash_rate": 0.1,
+        "mean_lane_changes": 1.0,
+        "mean_lane_command_rate": 0.03678571428571429,
+        "mean_speed": 21.4379364368185,
+        "mean_min_speed": 18.87735152847328,
+        "mean_throttle": 0.11194303290519332,
+        "mean_stop_ratio": 0.014285714285714285,
+        "mean_distance_travelled": 781.365878697373
+      }
+    },
+    {
+      "steps_done": 768,
+      "checkpoint_path": "experiments\\ppo_final\\20260318_004110\\seed_0\\checkpoints\\step_768.zip",
+      "score": 797.64341544141,
+      "summary": {
+        "mean_episode_return": 28.544776941154673,
+        "mean_steps": 36.9,
+        "crash_rate": 0.1,
+        "mean_lane_changes": 1.1,
+        "mean_lane_command_rate": 0.036111111111111115,
+        "mean_speed": 21.704553164574868,
+        "mean_min_speed": 18.173206332887823,
+        "mean_throttle": 0.21431931644678115,
+        "mean_stop_ratio": 0.01111111111111111,
+        "mean_distance_travelled": 801.9767487747433
+      }
+    },
+    {
+      "steps_done": 1024,
+      "checkpoint_path": "experiments\\ppo_final\\20260318_004110\\seed_0\\checkpoints\\step_1024.zip",
+      "score": 787.9131152490384,
+      "summary": {
+        "mean_episode_return": 28.27304361530189,
+        "mean_steps": 36.7,
+        "crash_rate": 0.1,
+        "mean_lane_changes": 1.1,
+        "mean_lane_command_rate": 0.03928571428571429,
+        "mean_speed": 21.69969121122034,
+        "mean_min_speed": 18.284246671041494,
+        "mean_throttle": 0.26585971918489254,
+        "mean_stop_ratio": 0.014285714285714285,
+        "mean_distance_travelled": 792.627400963324
+      }
+    }
+  ]
+}

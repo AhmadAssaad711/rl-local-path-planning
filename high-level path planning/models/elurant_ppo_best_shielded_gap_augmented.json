@@ -1,0 +1,16 @@
+{
+  "model_path": "models/elurant_ppo_best_shielded_gap_augmented.zip",
+  "source_checkpoint": "experiments/ppo_final/20260318_004606/seed_1/checkpoints/step_768.zip",
+  "reward_variant": "progress_clearance",
+  "action_variant": "intent_guarded_shielded",
+  "observation_variant": "gap_augmented",
+  "selection_method": "stage-wise custom diagnostics",
+  "stress_test_episodes": 30,
+  "stress_test_summary": {
+    "crash_rate": 0.0,
+    "mean_lane_changes": 0.2667,
+    "mean_speed": 21.5316,
+    "mean_stop_ratio": 0.0,
+    "mean_distance_travelled": 863.0391
+  }
+}

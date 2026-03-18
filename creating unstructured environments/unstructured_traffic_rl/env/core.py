@@ -80,6 +80,7 @@ class UnstructuredTrafficEnv(gym.Env):
 
         base_obs, info = self.base_env.reset(seed=seed)
         del base_obs
+        self._ensure_viewer_safe_actions()
         self._sync_runtime_state()
         self._assign_driver_profiles(force=True)
         self.hazard_manager.reset(self.base_env, self.current_scenario, self.rng)
@@ -95,6 +96,7 @@ class UnstructuredTrafficEnv(gym.Env):
     def step(self, action: int):
         if self.action_mapper is None:
             self.action_mapper = BehaviorActionMapper(self)
+        self._ensure_viewer_safe_actions()
         self._apply_ego_behavior(BehaviorAction(int(action)))
 
         base_action = self.action_mapper.map(action)
@@ -133,6 +135,24 @@ class UnstructuredTrafficEnv(gym.Env):
             config=self.current_scenario.env_config,
             render_mode=self.render_mode,
         )
+        self._ensure_viewer_safe_actions()
+
+    def _ensure_viewer_safe_actions(self) -> None:
+        action_type = getattr(self.base_env.unwrapped, "action_type", None)
+        action_indexes = getattr(action_type, "actions_indexes", None)
+        if not isinstance(action_indexes, dict):
+            return
+
+        idle_action = action_indexes.get("IDLE")
+        if idle_action is None and action_indexes:
+            idle_action = next(iter(action_indexes.values()))
+        if idle_action is None:
+            return
+
+        # highway-env's human viewer always probes lane keys on KEY_UP/KEY_DOWN.
+        # Provide no-op aliases for longitudinal-only configs so rendering stays stable.
+        action_indexes.setdefault("LANE_LEFT", int(idle_action))
+        action_indexes.setdefault("LANE_RIGHT", int(idle_action))
 
     def _sync_runtime_state(self) -> None:
         road = self.base_env.unwrapped.road
