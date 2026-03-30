@@ -1,0 +1,21 @@
+{
+  "trial_index": 23,
+  "run_name": "t23_crm150_hs040_rl005",
+  "group": "grid",
+  "seed": 64,
+  "collision_reward": -1.5,
+  "high_speed_reward": 0.4,
+  "right_lane_reward": 0.05,
+  "reward_config": {
+    "collision_reward": -1.5,
+    "high_speed_reward": 0.4,
+    "right_lane_reward": 0.05,
+    "lane_change_reward": 0.0,
+    "reward_speed_range": [
+      20,
+      30
+    ],
+    "normalize_reward": true,
+    "offroad_terminal": true
+  }
+}
