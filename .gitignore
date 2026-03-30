@@ -1,0 +1,30 @@
+# Local environments and caches
+/.venv/
+/.matplotlib/
+/.pip_tmp/
+**/__pycache__/
+*.py[cod]
+
+# Generated ML artifacts
+*.monitor.csv
+*.npz
+*.zip
+*.mp4
+events.out.tfevents.*
+
+# Generated experiment folders
+/logs/
+/models/
+/tb_logs/
+/high-level path planning/results/
+/high-level path planning/src/deep_learning/Elurant_PPO/logs/
+/high-level path planning/src/deep_learning/Elurant_PPO/tb_logs/
+/high-level path planning/src/deep_learning/Elurant_PPO/tb_logs_ppo_prev/
+/high-level path planning/src/deep_learning/Elurant_PPO/models/
+/high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/models/
+/high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/l/
+/high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/tb/
+/high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/v/
+/unstructured_scen_codes/unstruc_kouyrani_dqn/runs/
+/unstructured_scen_codes/unstruc_kouyrani_dqn/tensorboard/
+best_model/

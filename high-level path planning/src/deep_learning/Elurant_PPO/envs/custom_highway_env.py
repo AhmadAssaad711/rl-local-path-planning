@@ -4,7 +4,7 @@ import highway_env
 
 
 class CustomHighwayEnv(gym.Env):
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode=None, beta: float = 0.005):
         super().__init__()
 
         self.render_mode = render_mode
@@ -46,7 +46,7 @@ class CustomHighwayEnv(gym.Env):
         self.action_space = self.env.action_space
 
         self.v_target = 25.0
-        self.beta = 0.005  # reward scale
+        self.beta = float(beta)  # reward scale
 
     # -----------------------------------
     # RESET

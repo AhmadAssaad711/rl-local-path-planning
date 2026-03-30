@@ -1,0 +1,21 @@
+{
+  "trial_index": 2,
+  "run_name": "t02_crm075_hs025_rl005",
+  "group": "grid",
+  "seed": 43,
+  "collision_reward": -0.75,
+  "high_speed_reward": 0.25,
+  "right_lane_reward": 0.05,
+  "reward_config": {
+    "collision_reward": -0.75,
+    "high_speed_reward": 0.25,
+    "right_lane_reward": 0.05,
+    "lane_change_reward": 0.0,
+    "reward_speed_range": [
+      20,
+      30
+    ],
+    "normalize_reward": true,
+    "offroad_terminal": true
+  }
+}
