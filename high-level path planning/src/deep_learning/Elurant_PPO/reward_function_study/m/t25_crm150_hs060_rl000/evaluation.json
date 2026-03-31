@@ -1,0 +1,17 @@
+{
+  "mean_reward": 111.61723756342136,
+  "std_reward": 86.65089279568494,
+  "eval_collision": 0.4,
+  "eval_episode_length": 155.1,
+  "eval_episode_reward": 111.61723756342136,
+  "eval_mean_abs_delta_steering": 0.04584048949182033,
+  "eval_mean_abs_delta_throttle": 0.004895252687856555,
+  "eval_mean_forward_speed": 13.881743764877319,
+  "eval_offroad": 0.4,
+  "eval_right_lane_ratio": 0.5149390488862992,
+  "eval_steering_var": 0.060378695093095305,
+  "eval_throttle_var": 0.002044916406885022,
+  "elapsed_seconds": 3823.2557492256165,
+  "model_path": "C:\\Users\\aha173\\OneDrive - American University of Beirut\\AGV research\\high-level path following\\high-level path planning\\src\\deep_learning\\Elurant_PPO\\reward_function_study\\m\\t25_crm150_hs060_rl000\\ppo_highway.zip",
+  "video_path": "C:\\Users\\aha173\\OneDrive - American University of Beirut\\AGV research\\high-level path following\\high-level path planning\\src\\deep_learning\\Elurant_PPO\\reward_function_study\\v\\t25_crm150_hs060_rl000\\t25_crm150_hs060_rl000-episode-0.mp4"
+}

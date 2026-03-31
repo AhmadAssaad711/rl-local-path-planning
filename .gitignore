@@ -25,6 +25,9 @@ events.out.tfevents.*
 /high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/l/
 /high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/tb/
 /high-level path planning/src/deep_learning/Elurant_PPO/reward_function_study/v/
+/high-level path planning/src/deep_learning/Elurant_PPO/diff_reward_structure/r/
+/high-level path planning/src/deep_learning/Elurant_PPO/diff_reward_structure/off_road_penalty_run/
 /unstructured_scen_codes/unstruc_kouyrani_dqn/runs/
+/unstructured_scen_codes/unstruc_kouyrani_dqn/hyp_2/runs/
 /unstructured_scen_codes/unstruc_kouyrani_dqn/tensorboard/
 best_model/

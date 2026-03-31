@@ -1,5 +1,5 @@
 """
-Evaluate the trained Kourani DQN on 10 unstructured highway scenarios.
+Evaluate the trained Kourani DQN on unstructured highway scenarios.
 """
 
 from __future__ import annotations
@@ -7,26 +7,61 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
+import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime
-
-import cv2
-import numpy as np
-from stable_baselines3 import DQN
-from torch.utils.tensorboard import SummaryWriter
-import torch
+from pathlib import Path
 
 CURRENT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = CURRENT_DIR.parents[1]
+PROJECT_VENV_PYTHON = PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
 
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
+
+
+def maybe_reexec_with_project_venv() -> None:
+    if os.environ.get("KOURANI_UNSTRUCTURED_EVAL_SKIP_VENV_REEXEC") == "1":
+        return
+
+    if not PROJECT_VENV_PYTHON.exists():
+        return
+
+    try:
+        import cv2  # noqa: F401
+        import highway_env  # noqa: F401
+        import stable_baselines3  # noqa: F401
+        return
+    except ModuleNotFoundError:
+        current_python = Path(sys.executable).resolve()
+        venv_python = PROJECT_VENV_PYTHON.resolve()
+        if current_python == venv_python:
+            raise
+
+        child_env = dict(os.environ)
+        child_env["KOURANI_UNSTRUCTURED_EVAL_SKIP_VENV_REEXEC"] = "1"
+        result = subprocess.run(
+            [str(venv_python), str(Path(__file__).resolve()), *sys.argv[1:]],
+            check=False,
+            env=child_env,
+        )
+        raise SystemExit(result.returncode)
+
+
+maybe_reexec_with_project_venv()
+
+import cv2
+import numpy as np
+import torch
+from stable_baselines3 import DQN
+from torch.utils.tensorboard import SummaryWriter
 
 from highway_env_extension import make_unstructured_kourani_env
 from scenarios import SCENARIOS
 
 DEFAULT_MODEL_CANDIDATES = [
+    PROJECT_ROOT / "logs" / "model_ttc.zip",
     PROJECT_ROOT / "logs" / "model.zip",
     PROJECT_ROOT / "unstructured_scen_codes" / "model_DQN_15.zip",
 ]
@@ -34,53 +69,16 @@ DEFAULT_MODEL_CANDIDATES = [
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the Kourani DQN across 10 unstructured highway-env scenarios."
+        description="Run the Kourani DQN across unstructured highway-env scenarios."
     )
-    parser.add_argument(
-        "--model-path",
-        default=None,
-        help="Optional explicit path to the trained DQN zip file.",
-    )
-    parser.add_argument(
-        "--episodes-per-scenario",
-        type=int,
-        default=1000,
-        help="Evaluation episodes to run per scenario.",
-    )
-    parser.add_argument(
-        "--max-steps",
-        type=int,
-        default=300,
-        help="Safety cap on episode steps.",
-    )
-    parser.add_argument(
-        "--device",
-        default="auto",
-        help="Torch device passed to SB3 when loading the model.",
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-        help="Base seed for repeatable scenario evaluation.",
-    )
-    parser.add_argument(
-        "--skip-videos",
-        action="store_true",
-        help="Disable video recording for faster smoke tests.",
-    )
-    parser.add_argument(
-        "--scenario",
-        action="append",
-        default=None,
-        help="Optional scenario name filter. Can be passed multiple times.",
-    )
-    parser.add_argument(
-        "--progress-interval",
-        type=int,
-        default=25,
-        help="Print progress every N episodes per scenario.",
-    )
+    parser.add_argument("--model-path", default=None, help="Optional explicit path to the trained DQN zip file.")
+    parser.add_argument("--episodes-per-scenario", type=int, default=1000, help="Evaluation episodes to run per scenario.")
+    parser.add_argument("--max-steps", type=int, default=300, help="Safety cap on episode steps.")
+    parser.add_argument("--device", default="auto", help="Torch device passed to SB3 when loading the model.")
+    parser.add_argument("--seed", type=int, default=42, help="Base seed for repeatable scenario evaluation.")
+    parser.add_argument("--skip-videos", action="store_true", help="Disable video recording for faster smoke tests.")
+    parser.add_argument("--scenario", action="append", default=None, help="Optional scenario name filter. Can be passed multiple times.")
+    parser.add_argument("--progress-interval", type=int, default=25, help="Print progress every N episodes per scenario.")
     return parser.parse_args()
 
 
@@ -241,11 +239,7 @@ def evaluate_scenario(
     tensorboard_root = run_root / "tensorboard" / scenario_name
     writer = SummaryWriter(log_dir=str(tensorboard_root))
 
-    base_env = make_unstructured_kourani_env(
-        render_mode="rgb_array",
-        config=config,
-    )
-    env = base_env
+    env = make_unstructured_kourani_env(render_mode="rgb_array", config=config)
 
     model = DQN.load(str(model_path), env=env, device=args.device)
     lane_change_ids = action_lane_change_ids(env)
@@ -258,6 +252,8 @@ def evaluate_scenario(
     distances: list[float] = []
     lane_changes: list[int] = []
     crash_flags: list[int] = []
+    episode_avg_ttc: list[float] = []
+    episode_avg_ttc_penalty: list[float] = []
 
     try:
         for episode_idx in range(args.episodes_per_scenario):
@@ -269,6 +265,8 @@ def evaluate_scenario(
             distance_m = 0.0
             step_count = 0
             lane_change_count = 0
+            ttc_trace: list[float] = []
+            ttc_penalty_trace: list[float] = []
             last_info = info
             video_writer = None
             video_path = None
@@ -309,6 +307,8 @@ def evaluate_scenario(
                     speed_mps = float(last_info.get("speed", 0.0))
                     speed_trace.append(speed_mps)
                     distance_m += speed_mps / policy_frequency
+                    ttc_trace.append(float(last_info.get("ttc_current", np.nan)))
+                    ttc_penalty_trace.append(float(last_info.get("ttc_penalty", 0.0)))
 
                     if args.max_steps and step_count >= args.max_steps:
                         truncated = True
@@ -321,6 +321,8 @@ def evaluate_scenario(
 
             avg_speed = float(np.mean(speed_trace)) if speed_trace else 0.0
             crashed = int(bool(last_info.get("crashed", False)))
+            avg_ttc = float(np.nanmean(ttc_trace)) if ttc_trace else float("nan")
+            avg_ttc_penalty = float(np.mean(ttc_penalty_trace)) if ttc_penalty_trace else 0.0
 
             rewards.append(total_reward)
             avg_speeds.append(avg_speed)
@@ -328,6 +330,8 @@ def evaluate_scenario(
             distances.append(distance_m)
             lane_changes.append(lane_change_count)
             crash_flags.append(crashed)
+            episode_avg_ttc.append(avg_ttc)
+            episode_avg_ttc_penalty.append(avg_ttc_penalty)
 
             writer.add_scalar("episodes/reward", total_reward, episode_idx)
             writer.add_scalar("episodes/avg_speed_mps", avg_speed, episode_idx)
@@ -335,6 +339,9 @@ def evaluate_scenario(
             writer.add_scalar("episodes/distance_m", distance_m, episode_idx)
             writer.add_scalar("episodes/lane_changes", lane_change_count, episode_idx)
             writer.add_scalar("episodes/collision", crashed, episode_idx)
+            if not np.isnan(avg_ttc):
+                writer.add_scalar("episodes/avg_ttc_current", avg_ttc, episode_idx)
+            writer.add_scalar("episodes/avg_ttc_penalty", avg_ttc_penalty, episode_idx)
             if (
                 episode_idx == 0
                 or (episode_idx + 1) % max(1, args.progress_interval) == 0
@@ -343,7 +350,8 @@ def evaluate_scenario(
                 print(
                     f"[{scenario_name}] episode {episode_idx + 1}/{args.episodes_per_scenario} "
                     f"| reward={total_reward:.2f} speed={avg_speed:.2f} "
-                    f"| crash={bool(crashed)} steps={step_count}"
+                    f"| crash={bool(crashed)} steps={step_count} "
+                    f"| avg_ttc={avg_ttc:.2f} penalty={avg_ttc_penalty:.3f}"
                 )
                 writer.flush()
     finally:
@@ -363,6 +371,8 @@ def evaluate_scenario(
         "avg_distance_m": float(np.mean(distances)),
         "success_pct": float(100.0 * (1.0 - np.mean(crash_flags))),
         "avg_lane_changes": float(np.mean(lane_changes)),
+        "avg_ttc_current": float(np.nanmean(episode_avg_ttc)),
+        "avg_ttc_penalty": float(np.mean(episode_avg_ttc_penalty)),
         "config": config,
         "tensorboard_dir": str(tensorboard_root),
         "video_dir": None if video_root is None else str(video_root),
@@ -377,6 +387,9 @@ def evaluate_scenario(
     writer.add_scalar("aggregate/avg_distance_m", summary["avg_distance_m"], 0)
     writer.add_scalar("aggregate/success_pct", summary["success_pct"], 0)
     writer.add_scalar("aggregate/avg_lane_changes", summary["avg_lane_changes"], 0)
+    if not np.isnan(summary["avg_ttc_current"]):
+        writer.add_scalar("aggregate/avg_ttc_current", summary["avg_ttc_current"], 0)
+    writer.add_scalar("aggregate/avg_ttc_penalty", summary["avg_ttc_penalty"], 0)
     writer.flush()
     writer.close()
 
@@ -401,6 +414,8 @@ def write_results(summaries: list[dict], results_dir: Path) -> None:
         "avg_distance_m",
         "success_pct",
         "avg_lane_changes",
+        "avg_ttc_current",
+        "avg_ttc_penalty",
         "model_path",
         "tensorboard_dir",
         "video_dir",
@@ -442,7 +457,9 @@ def main() -> None:
             f"speed={summary['avg_speed_mps']:.2f} m/s, "
             f"collisions={summary['collision_pct']:.1f}%, "
             f"length={summary['episode_length_steps']:.1f} steps, "
-            f"reward={summary['mean_reward']:.3f}"
+            f"reward={summary['mean_reward']:.3f}, "
+            f"ttc={summary['avg_ttc_current']:.2f}, "
+            f"ttc_penalty={summary['avg_ttc_penalty']:.3f}"
         )
 
 

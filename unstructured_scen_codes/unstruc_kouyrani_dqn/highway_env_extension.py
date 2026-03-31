@@ -4,13 +4,23 @@ Custom highway-env extension for evaluating the Kourani DQN in unstructured traf
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import Any
 
-from highway_env import utils
 from highway_env.envs.highway_env import HighwayEnv
 from highway_env.vehicle.behavior import IDMVehicle
 from highway_env.vehicle.kinematics import Vehicle
 from highway_env.utils import near_split
+
+CURRENT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = CURRENT_DIR.parents[1]
+DQN_MODULE_DIR = PROJECT_ROOT / "high-level path planning" / "src" / "deep_learning" / "DQN"
+
+if str(DQN_MODULE_DIR) not in sys.path:
+    sys.path.insert(0, str(DQN_MODULE_DIR))
+
+from ttc_reward_wrapper import build_ttc_config, wrap_env_with_ttc
 
 
 class NominalVehicle(IDMVehicle):
@@ -136,9 +146,12 @@ class UnstructuredKouraniHighwayEnv(HighwayEnv):
 def make_unstructured_kourani_env(
     render_mode: str = "rgb_array",
     config: dict[str, Any] | None = None,
-) -> UnstructuredKouraniHighwayEnv:
+    ttc_config: dict[str, Any] | None = None,
+):
     env = UnstructuredKouraniHighwayEnv(render_mode=render_mode)
     if config:
         env.configure(config)
-        env.reset()
-    return env
+    wrapped_env = wrap_env_with_ttc(env, ttc_config=build_ttc_config(ttc_config))
+    if config:
+        wrapped_env.reset()
+    return wrapped_env

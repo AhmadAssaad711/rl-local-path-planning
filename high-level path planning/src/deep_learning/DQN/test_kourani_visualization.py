@@ -8,25 +8,62 @@ action values appear alongside the highway rendering during a normal rollout.
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
+import subprocess
+import sys
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+PROJECT_VENV_PYTHON = PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
+DEFAULT_MODEL_PATH = PROJECT_ROOT / "logs" / "model_ttc.zip"
+MODEL_CANDIDATES = [
+    DEFAULT_MODEL_PATH,
+    PROJECT_ROOT / "logs" / "model.zip",
+    PROJECT_ROOT / "unstructured_scen_codes" / "model_DQN_15.zip",
+    Path.cwd() / "logs" / "model_ttc.zip",
+    Path.cwd() / "logs" / "model.zip",
+]
+
+
+def maybe_reexec_with_project_venv() -> None:
+    if os.environ.get("KOURANI_VISUAL_SKIP_VENV_REEXEC") == "1":
+        return
+
+    if not PROJECT_VENV_PYTHON.exists():
+        return
+
+    try:
+        import highway_env  # noqa: F401
+        import matplotlib  # noqa: F401
+        import stable_baselines3  # noqa: F401
+        return
+    except ModuleNotFoundError:
+        current_python = Path(sys.executable).resolve()
+        venv_python = PROJECT_VENV_PYTHON.resolve()
+        if current_python == venv_python:
+            raise
+
+        child_env = dict(os.environ)
+        child_env["KOURANI_VISUAL_SKIP_VENV_REEXEC"] = "1"
+        result = subprocess.run(
+            [str(venv_python), str(Path(__file__).resolve()), *sys.argv[1:]],
+            check=False,
+            env=child_env,
+        )
+        raise SystemExit(result.returncode)
+
+
+maybe_reexec_with_project_venv()
 
 import gymnasium as gym
-import highway_env  # noqa: F401 - registers highway environments
 import matplotlib as mpl
 import matplotlib.cm as cm
 import numpy as np
 import torch
 from stable_baselines3 import DQN
 
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = SCRIPT_DIR.parents[4]
-DEFAULT_MODEL_PATH = PROJECT_ROOT / "logs" / "model.zip"
-MODEL_CANDIDATES = [
-    DEFAULT_MODEL_PATH,
-    PROJECT_ROOT / "unstructured_scen_codes" / "model_DQN_15.zip",
-    Path.cwd() / "logs" / "model.zip",
-]
+from ttc_reward_wrapper import make_ttc_highway_env
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,7 +93,7 @@ def make_env() -> gym.Env:
         "screen_width": 900,
         "screen_height": 220,
     }
-    return gym.make("highway-v0", render_mode="human", config=config)
+    return make_ttc_highway_env(render_mode="human", config=config)
 
 
 def viewer_closed(env: gym.Env) -> bool:
@@ -210,7 +247,6 @@ def main() -> None:
         obs, info = env.reset(seed=args.seed)
         graphics_agent.update(obs)
 
-        # Create the viewer, then attach the agent display panel.
         if not safe_render(env):
             print("Viewer closed before visualization started.")
             return
@@ -257,7 +293,9 @@ def main() -> None:
 
             print(
                 f"Episode {episode + 1}: reward={total_reward:.2f}, "
-                f"steps={step_count}, crashed={bool(info.get('crashed', False))}"
+                f"steps={step_count}, crashed={bool(info.get('crashed', False))}, "
+                f"ttc={float(info.get('ttc_current', float('nan'))):.2f}, "
+                f"ttc_penalty={float(info.get('ttc_penalty', 0.0)):.3f}"
             )
     finally:
         env.close()

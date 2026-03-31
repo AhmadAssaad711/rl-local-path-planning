@@ -87,6 +87,7 @@ class TrialSpec:
         config.update(
             {
                 "collision_reward": self.collision_reward,
+                "offroad_penalty": self.collision_reward,
                 "high_speed_reward": self.high_speed_reward,
                 "right_lane_reward": self.right_lane_reward,
             }

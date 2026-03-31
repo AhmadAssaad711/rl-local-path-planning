@@ -4,6 +4,7 @@ This folder runs a sequential PPO sweep over the native `highway-v0` reward term
 
 Default study design:
 
+- `offroad_penalty = collision_reward` for each trial
 - `collision_reward ∈ {-0.75, -1.0, -1.5}`
 - `high_speed_reward ∈ {0.25, 0.4, 0.6}`
 - `right_lane_reward ∈ {0.0, 0.05, 0.1}`
@@ -52,6 +53,12 @@ Open TensorBoard on the study logs:
 tensorboard --logdir ".\high-level path planning\src\deep_learning\Elurant_PPO\reward_function_study\tb_logs"
 ```
 
+Generate summary graphs from the aggregated CSV:
+
+```powershell
+python ".\high-level path planning\src\deep_learning\Elurant_PPO\reward_function_study\plot_reward_study_summary.py"
+```
+
 Study outputs are written to:
 
 - `m/` for saved PPO checkpoints and manifests
@@ -59,3 +66,4 @@ Study outputs are written to:
 - `tb/` for TensorBoard
 - `v/` for one-episode evaluation recordings
 - `s/reward_grid_summary.csv` for the aggregated run table
+- `s/plots/` for summary graph exports
