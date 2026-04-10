@@ -76,7 +76,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-steps", type=int, default=300, help="Safety cap on episode steps.")
     parser.add_argument("--device", default="auto", help="Torch device passed to SB3 when loading the model.")
     parser.add_argument("--seed", type=int, default=42, help="Base seed for repeatable scenario evaluation.")
-    parser.add_argument("--skip-videos", action="store_true", help="Disable video recording for faster smoke tests.")
+    parser.add_argument("--skip-videos", action="store_true", help="Disable video recording for faster evaluation runs.")
     parser.add_argument("--scenario", action="append", default=None, help="Optional scenario name filter. Can be passed multiple times.")
     parser.add_argument("--progress-interval", type=int, default=25, help="Print progress every N episodes per scenario.")
     return parser.parse_args()
@@ -236,7 +236,9 @@ def evaluate_scenario(
     config = dict(scenario["config"])
 
     video_root = video_run_root / scenario_name if video_run_root else None
-    tensorboard_root = run_root / "tensorboard" / scenario_name
+    # Keep eval tensorboard paths short enough for Windows event filenames.
+    tensorboard_root = run_root / "tb" / f"s{scenario_index + 1:02d}"
+    tensorboard_root.mkdir(parents=True, exist_ok=True)
     writer = SummaryWriter(log_dir=str(tensorboard_root))
 
     env = make_unstructured_kourani_env(render_mode="rgb_array", config=config)

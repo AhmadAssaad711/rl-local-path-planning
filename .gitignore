@@ -5,6 +5,12 @@
 **/__pycache__/
 *.py[cod]
 
+# Obsidian vault files
+.obsidian/
+**/.obsidian/
+.obsidian.json
+*.canvas
+
 # Generated ML artifacts
 *.monitor.csv
 *.npz
