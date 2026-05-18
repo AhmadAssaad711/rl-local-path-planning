@@ -1,8 +1,8 @@
 <div align="center">
 
-# RL Local Path Planning
+# Physics-Informed RL for Racetrack Local Path Planning
 
-**Racetrack local path-following with tabular RL and a physics-informed state formulation.**
+**A racetrack path-following study comparing basic tabular Q-learning with a curvature-aware physics-informed formulation.**
 
 [Agents](#agent-map) | [Run](#run) | [Layout](#repository-layout)
 
